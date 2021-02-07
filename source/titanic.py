@@ -119,6 +119,17 @@ class RandomClassifier(Classifier) :
         
         ### ========== TODO : START ========== ###
         # insert your RandomClassifier code
+        vals, counts = np.unique(y, return_counts=True)
+        # dictionary that maps the predicted class to the frequency of that prediction
+        # find the sum of the frequencies to normalize
+        sum = 0
+        for i in range(len(counts)):
+            sum+=counts[i]
+        
+        dictionary = {}
+        for i in range(len(vals)):
+            dictionary[i] = counts[i]/sum
+        self.probabilities_ = dictionary
         
         ### ========== TODO : END ========== ###
         return self
@@ -143,7 +154,18 @@ class RandomClassifier(Classifier) :
         ### ========== TODO : START ========== ###
         # insert your RandomClassifier code
         
-        y = None
+        n,d = X.shape
+        # documentation: https://numpy.org/doc/stable/reference/random/generated/numpy.random.choice.html
+        lengthOfArray = len(self.probabilities_)
+        ArrayOfProbabilities = []
+        sum = 0
+
+        for values in range(len(self.probabilities_)):
+            sum += self.probabilities_[values]
+        # create array that has corresponding probability chance for each class
+        for i in range(len(self.probabilities_)):
+            ArrayOfProbabilities.append(self.probabilities_[i])
+        y = np.random.choice(lengthOfArray, n, p = ArrayOfProbabilities)
         
         ### ========== TODO : END ========== ###
         
@@ -175,6 +197,7 @@ def error(clf, X, y, ntrials=100, nfolds=10, train_size=1.0) :
     """
     
     # initialize train and test scores for each trial and fold
+    # these are two dimensional arrays that we will fit in 
     train_scores = np.empty((ntrials, nfolds))
     test_scores = np.empty((ntrials, nfolds))
     
@@ -182,7 +205,31 @@ def error(clf, X, y, ntrials=100, nfolds=10, train_size=1.0) :
     # part c: compute errors over trials and folds
     # hint: use Stratified KFold (set three parameters)
     # professor's solution: 10 lines
+    for trial in range(ntrials):
+        fold = 0
+        skf = StratifiedKFold(n_splits=nfolds,shuffle = False, random_state = trial, shuffle = False)
+        StratifiedKFold(n_splits=2, random_state=None, shuffle=False)
+        for train_index, test_index in skf.split(X, y):
+            # get the x_trains and y_trains
+            X_train, X_test = X[train_index], X[test_index]
+            y_train, y_test = y[train_index], y[test_index]
+            # fit the model
+            clf.fit(X_train, y_train)      
+            # fit training data using the classifier
+            y_train_pred = clf.predict(X_train)  # take the classifier and run it on the training data
+            y_test_pred = clf.predict(X_test)
+            # calculate the score
+            train_accuracy = metrics.accuracy_score(y_train, y_train_pred, normalize=True)
+            test_accuracy = metrics.accuracy_score(y_test, y_test_pred, normalize=True)
+            # place the training error in train_scores and test_scores
+            train_scores[trial][fold] = train_accuracy
+            test_scores[trial][fold] = test_accuracy
+            fold += 1
+        
+            
     
+
+
     # part f: vary training set size
     # for a given fold, splice train indices to keep start of list, rounding down if needed
     # professor's solution: 1 line
@@ -230,6 +277,14 @@ def main():
     # use random_state=1234 to ensure consistency with solutions (set two parameters total)
     # professor's solution: 5 lines
     print('Classifying using Decision Tree...')
+    # initialize tree
+    # kaggle link https://www.kaggle.com/dansbecker/your-first-machine-learning-model
+    treeCLF = DecisionTreeClassifier(random_state=1234, criterion='entropy')
+    treeCLF.fit(X_train, y_train)
+    y_predCLF = treeCLF.predict(X_train)
+    train_errorCLF = 1 - metrics.accuracy_score(y_train, y_predCLF, normalize=True)
+    print(f'\t-- training error of Decision Tree: {train_errorCLF:.3f}')
+
     
     ### ========== TODO : END ========== ###
     
