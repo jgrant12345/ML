@@ -206,11 +206,10 @@ def error(clf, X, y, ntrials=100, nfolds=10, train_size=1.0) :
     # hint: use Stratified KFold (set three parameters)
     # professor's solution: 10 lines
     for trial in range(ntrials):
-        fold = 0
-        skf = StratifiedKFold(n_splits=nfolds,shuffle = False, random_state = trial, shuffle = False)
-        StratifiedKFold(n_splits=2, random_state=None, shuffle=False)
-        for train_index, test_index in skf.split(X, y):
+        skf = StratifiedKFold(n_splits=nfolds, shuffle = True, random_state = trial)
+        for fold, (train_index, test_index) in enumerate(skf.split(X, y)):
             # get the x_trains and y_trains
+            # can modify train_index to include proportion given to us by train_size
             X_train, X_test = X[train_index], X[test_index]
             y_train, y_test = y[train_index], y[test_index]
             # fit the model
@@ -224,7 +223,6 @@ def error(clf, X, y, ntrials=100, nfolds=10, train_size=1.0) :
             # place the training error in train_scores and test_scores
             train_scores[trial][fold] = train_accuracy
             test_scores[trial][fold] = test_accuracy
-            fold += 1
         
             
     
