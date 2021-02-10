@@ -210,8 +210,10 @@ def error(clf, X, y, ntrials=100, nfolds=10, train_size=1.0) :
         for fold, (train_index, test_index) in enumerate(skf.split(X, y)):
             # get the x_trains and y_trains
             # can modify train_index to include proportion given to us by train_size
-            X_train, X_test = X[train_index], X[test_index]
-            y_train, y_test = y[train_index], y[test_index]
+            #QUESTION5 do we use endIndex on the X_test and y_test
+            endIndex = math.floor(len(train_index)*train_size)
+            X_train, X_test = X[train_index[0:endIndex]], X[test_index]
+            y_train, y_test = y[train_index[0:endIndex]], y[test_index]
             # fit the model
             clf.fit(X_train, y_train)      
             # fit training data using the classifier
@@ -312,6 +314,15 @@ def main():
     ### ========== TODO : START ========== ###
     # part d: evaluate using error(...)
     # professor's solution: 6 lines
+    randomCLF = RandomClassifier()
+    treeCLF = DecisionTreeClassifier(random_state=1234, criterion='entropy')
+    majCLF = MajorityVoteClassifier()
+    print("----------------------------")
+    print("Random Classifier training error and test error",error(randomCLF, X_train, y_train))
+    print("Majority Classifier training error and test error",error(majCLF, X_train, y_train))
+    print("Decision Tree classifier Classifier training error and test error"
+    ,error(treeCLF, X_train, y_train))
+
     
     ### ========== TODO : END ========== ###
     
@@ -328,7 +339,7 @@ def main():
         ### ========== TODO : START ========== ###
         # part e: set parameters for classifier
         # professor's solution: 1 line
-        clf = DecisionTreeClassifier()
+        clf = DecisionTreeClassifier(random_state = 1234, max_depth = depth, criterion = 'entropy')
         ### ========== TODO : END ========== ###
         train_error, test_error = error(clf, X_train, y_train)
         train_errors_depths.append(train_error)
@@ -348,8 +359,14 @@ def main():
     
     ### ========== TODO : START ========== ###
     # part e: determine optimal depth
+    #QUESTION3 what's this about?
     # professor's solution: 3 lines
-    
+    min_index = np.argmin(test_errors_depths)
+    opt_depth = depths[min_index]
+    print("Optimal depth is", opt_depth)
+
+
+
     ### ========== TODO : END ========== ###
     
     
@@ -361,10 +378,10 @@ def main():
     ### ========== TODO : START ========== ###
     # part g: set parameters for classifiers
     # professor's solution: 3 lines
-    
-    clfs = {'full':        DecisionTreeClassifier(), # full depth
-            'single leaf': DecisionTreeClassifier(), # single leaf
-            'optimal':     DecisionTreeClassifier()} # optimal (tuned) depth
+    # QUESTION6 IS THIS RIGHT?
+    clfs = {'full':        DecisionTreeClassifier(max_depth = None, criterion = 'entropy'), # full depth
+            'single leaf': DecisionTreeClassifier(max_depth = 1, criterion = 'entropy'), # single leaf
+            'optimal':     DecisionTreeClassifier(max_depth = opt_depth, criterion = 'entropy')} # optimal (tuned) depth
     ### ========== TODO : END ========== ###
     
     train_sizes = np.linspace(.1, 1.0, 5)
