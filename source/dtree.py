@@ -184,8 +184,8 @@ class Tree(object) :
             H_cond = 0
             # we want to calculate the best entropy given a certain threshold
             # each threshold has equal likelihood
-            # H_cond += prob*self._entropy(y1) 
-            # H_cond += 1/(n_values)*self._entropy(y2) 
+            H_cond += (len(y1)/len(y))*self._entropy(y1) 
+            H_cond += (len(y2)/len(y))*self._entropy(y2) 
             ### ========== TODO : END ========== ###
             H_conds[i] = H_cond
         
@@ -234,11 +234,11 @@ class Tree(object) :
         # professor's solution: 3 lines
         for i in range(n):
             if X[i][feature] <= threshold:
-                X1.append(X1[i])
-                y1.append(y1[i])
+                X1.append(X[i])
+                y1.append(y[i])
             else:
-                X2.append(X2[i])
-                y2.append(y2[i])
+                X2.append(X[i])
+                y2.append(y[i])
         
         ### ========== TODO : END ========== ###
         X1 = np.array(X1).reshape((-1,d))
@@ -353,7 +353,7 @@ class Tree(object) :
         # base case
         # 1) all samples have same labels
         # 2) all samples have same features
-        if self.children_left[node] == -1: # you should modify this condition
+        if len(np.unique(y, return_counts = True, axis = 0)[1]) == 1 and len(np.unique(X, return_counts = True, axis = 0)[1]) == 1 : # you should modify this condition
             # this line is so that the code can run
             # you can comment it out (or not) once you add your own code
             self._create_new_leaf(node,value,impurity)
@@ -362,18 +362,17 @@ class Tree(object) :
         else :
             # this line is so that the code can run
             # you can comment it out (or not) once you add your own code
-
             # choose best feature (and find associated threshold)
             best_feature, best_threshold = self._choose_feature(X, y)
             
             # make new decision tree node
             self._create_new_node(node, best_feature, best_threshold, value, impurity)
             # split data on best feature
-            X1, y1, X2, y2 = self._split_data(X, y, feature, threshold)
+            X1, y1, X2, y2 = self._split_data(X, y, best_feature, best_threshold)
             # build left subtree using recursion (be careful how you index left child)
-            self._build_helper(X1, y1, self.left_child[node])
+            self._build_helper(X1, y1, self.children_left[node])
             # build right subtree using recursion (be careful how you index right child)
-            self._build_helper(X2, y2, self.right_child[node])
+            self._build_helper(X2, y2, self.children_right[node])
         ### ========== TODO : END ========== ###
     
     #========================================
@@ -442,13 +441,12 @@ class Tree(object) :
                 # part e: make prediction
                 # you can modify any code within this TODO block
                 # professor's solution: 4 lines
-                
                 # determine branch based on feature and threshold of current node
                 # then update node
-                if True :
-                    pass
+                if x[self.feature[node]] <= self.threshold[node]:
+                    node = self.children_left[node]                    
                 else :
-                    pass
+                    node = self.children_right[node]
                 ### ========== TODO : END ========== ###
             
             # keep value
