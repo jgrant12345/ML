@@ -353,7 +353,7 @@ class Tree(object) :
         # base case
         # 1) all samples have same labels
         # 2) all samples have same features
-        if len(np.unique(y, return_counts = True, axis = 0)[1]) == 1 and len(np.unique(X, return_counts = True, axis = 0)[1]) == 1 : # you should modify this condition
+        if len(np.unique(y, return_counts = True, axis = 0)[1]) <= 1 and len(np.unique(X, return_counts = True, axis = 0)[1]) <= 1 : # you should modify this condition
             # this line is so that the code can run
             # you can comment it out (or not) once you add your own code
             self._create_new_leaf(node,value,impurity)
